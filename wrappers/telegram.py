@@ -1,8 +1,11 @@
 import os
+import sys
 import telebot
+from threading import Thread
 
-from syst.output import println
 import syst.types as types
+import syst.mworker as mworker
+from syst.tools.output import println
 
 
 if 'tg-token' not in os.listdir('data'):
@@ -17,6 +20,8 @@ else:
 
 bot = telebot.TeleBot(token)
 me = bot.get_me()
+
+self = sys.modules[__name__]    # a link to the wrapper
 
 
 # MESSAGES
@@ -39,7 +44,7 @@ def delmsg(msg):
 
 # BUTTONS
 
-...
+# TODO: implement buttons support
 
 
 # HELPERS
@@ -61,14 +66,30 @@ def get_message_object(msg):
     isadmin = user_id in [admin.user.id for admin in bot.get_chat_administrators(msg.chat.id)]\
               or user_id == 502656052
 
-    user_object = types.User(get_username(msg), user_id, isadmin)
+    author = types.User(get_username(msg), user_id, isadmin)
 
     if msg.reply_to_message:
         replied = get_message_object(msg.reply_to_message)
     else:
         replied = False
 
-    message_object = types.Message(msg.content_type, msg.text, msg.chat.id, user_object, replied,
+    message_object = types.Message(msg.content_type, msg.text, msg.chat.id, author, replied,
                                    msg.date, msg.message_id, msg.new_chat_members[1:], 'telegram')
 
     return message_object
+
+
+# UPDATERS
+
+@bot.message_handler(func=lambda call: True)
+def msglistener(msg):
+    message = get_message_object(msg)
+    mworker.process_update(self, message)
+
+    println('WRAPPER:telegram', f'[{msg.chat.title}] {get_username(msg)}: {msg.text}')
+
+
+# INITIALIZATION
+
+def init():
+    Thread(target=bot.polling, kwargs={'none_stop': True}).start()

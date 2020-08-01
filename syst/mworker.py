@@ -1,4 +1,4 @@
-import syst.threadpool as tp
+import syst.tools.threadpool as tp
 
 
 THREADS_FOR_HANDLERS_PROCESSING = 10
@@ -20,7 +20,7 @@ def add_handler(name, handler_func, _filter):
     handlers.append((name, handler_func, _filter))
 
 
-def process_updates(wrapper, message):
+def process_update(wrapper, message):
     threadpool = tp.ThreadPool(THREADS_FOR_HANDLERS_PROCESSING)
 
     for name, func, _filter in handlers:
