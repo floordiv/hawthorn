@@ -31,8 +31,6 @@ def sendmsg(msg, text, **kwargs):
 
 
 def replymsg(msg, text):
-    print(msg.message_id)
-
     sendmsg(msg, text, reply_to_message_id=msg.message_id)
 
 
