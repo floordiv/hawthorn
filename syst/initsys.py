@@ -1,5 +1,7 @@
 from importlib import import_module
 
+from traceback import format_exc
+
 import syst.tools.getfiles as gf    # I don't have it
 from syst.tools.output import println
 
@@ -15,6 +17,7 @@ for module in modules:
 
         println('INIT-MODULE:' + module_name, 'Loaded')
     except Exception as exc:
+        print(format_exc())
         println('INIT-MODULE:' + module_name, 'Failed: ' + str(exc))
 
 

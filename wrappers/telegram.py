@@ -27,11 +27,13 @@ self = sys.modules[__name__]    # a link to the wrapper
 # MESSAGES
 
 def sendmsg(msg, text, **kwargs):
-    bot.send_message(msg.chat, text, reply_markup='html', **kwargs)
+    bot.send_message(msg.chat, text, parse_mode='html', **kwargs)
 
 
 def replymsg(msg, text):
-    sendmsg(msg, text, reply_to_message_id=msg.replied.message_id)
+    print(msg.message_id)
+
+    sendmsg(msg, text, reply_to_message_id=msg.message_id)
 
 
 def editmsg(msg, text):
@@ -73,8 +75,20 @@ def get_message_object(msg):
     else:
         replied = False
 
-    message_object = types.Message(msg.content_type, msg.text, msg.chat.id, author, replied,
-                                   msg.date, msg.message_id, msg.new_chat_members[1:], 'telegram')
+    if msg.new_chat_members:
+        new_chat_members = msg.new_chat_members[1:]
+    else:
+        new_chat_members = None
+
+    message_object = types.Message(msg.content_type,
+                                   msg.text,
+                                   msg.chat.id,
+                                   author,
+                                   msg.date,
+                                   msg.message_id,
+                                   replied,
+                                   new_chat_members,
+                                   'telegram')
 
     return message_object
 

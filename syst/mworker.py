@@ -12,8 +12,12 @@ def handler(name=None, _filter=None):
     if _filter is None:
         _filter = name
 
-    def handler_decorator(func):
+    def decorator(func):
         handlers.append((name, func, _filter))
+
+        return func
+
+    return decorator
 
 
 def add_handler(name, handler_func, _filter):
