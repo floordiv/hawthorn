@@ -52,6 +52,8 @@ def date_by_seconds(seconds):
 
         if value == 1:
             name = name.rstrip('s')
+        elif value == 0:
+            continue
 
         result += str(value) + ' ' + name + ', '
     return result
