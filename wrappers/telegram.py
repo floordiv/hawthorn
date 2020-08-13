@@ -1,11 +1,13 @@
 import os
 import sys
+import time
 import telebot
 from threading import Thread
 
 import syst.types as types
 import syst.mworker as mworker
 from syst.tools.output import println
+import syst.tools.dateparser as dateparser
 
 
 if 'tg-token' not in os.listdir('data'):
@@ -38,8 +40,43 @@ def editmsg(msg, text):
     bot.edit_message_text(text, msg.chat, msg.message_id)
 
 
-def delmsg(msg):
-    bot.delete_message(msg.chat, msg.message_id)
+def delmsg(*msgs, chat=None, by_id=False):
+    for msg in msgs:
+        if not by_id:
+            bot.delete_message(msg.chat, msg.message_id)
+        else:
+            bot.delete_message(chat, msg)    # msg is id of the message
+
+
+# USER RESTRICTIONS
+
+
+def mute(msg, duration='1m'):
+    if not isinstance(duration, (list, tuple)):
+        duration = [*duration]
+
+    until_date = time.time() + dateparser.parse(*duration)
+    bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, False, False, False, False)
+
+
+def unmute(msg, duration='366d'):
+    if not isinstance(duration, (list, tuple)):
+        duration = [*duration]
+
+    until_date = time.time() + dateparser.parse(*duration)
+    bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, True, True, True, True)
+
+
+def ban(msg, duration='1m'):
+    if not isinstance(duration, (list, tuple)):
+        duration = [*duration]
+
+    until_date = time.time() + dateparser.parse(*duration)
+    bot.kick_chat_member(msg.chat, msg.author.userid, until_date)
+
+
+def unban(msg, duration='366d'):
+    bot.unban_chat_member(msg.chat, msg.author.userid)
 
 
 # BUTTONS

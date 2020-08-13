@@ -30,3 +30,15 @@ def process_update(wrapper, message):
     for name, func, _filter in handlers:
         if _filter(message):
             threadpool.add_event(func, (wrapper, message))
+
+
+# HELPERS
+
+def startswith(text, variables):
+    text = str(text).lower()
+
+    for var in variables:
+        if text.startswith(var):
+            return True
+
+    return False
