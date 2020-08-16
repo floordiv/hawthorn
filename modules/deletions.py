@@ -1,4 +1,8 @@
+import syst.tools.dbm as dbm
 import syst.mworker as mworker
+
+
+dbm.open_db('user-deletions.db')
 
 
 @mworker.handler(lambda msg: msg.content.lower().startswith('удали') and msg.author.admin and msg.replied)
@@ -10,3 +14,8 @@ def delete_one_message(wrapper, msg):
 def delete_thread(wrapper, msg):
     messages_to_delete = range(msg.replied.message_id, msg.message_id + 1)
     wrapper.delmsg(*messages_to_delete, chat=msg.chat, by_id=True)
+
+
+@mworker.handler(lambda msg: False)
+def channel_mode(wrapper, msg):
+    ...

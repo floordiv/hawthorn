@@ -2,10 +2,13 @@ import os
 import sys
 import time
 import telebot
+from time import sleep
 from threading import Thread
 
 import syst.types as types
+import syst.tools.dbm as dbm
 import syst.mworker as mworker
+from syst.tools.locale import locale
 from syst.tools.output import println
 import syst.tools.dateparser as dateparser
 
@@ -25,18 +28,36 @@ me = bot.get_me()
 
 self = sys.modules[__name__]    # a link to the wrapper
 
+dbm.open_db('chat-langs', 'CREATE TABLE IF NOT EXISTS chats (platform string, chat string, lang string)')
+dbm.execute('chat-langs', 'SELECT * FROM chats WHERE platform = "telegram"')
+query_result = dbm.fetchall('chat-langs')  # ((chat_id, lang), (...))
+
+if query_result:
+    chat_langs = dict([(chat, lang) for platform, chat, lang in query_result])
+else:
+    chat_langs = {}
+
 
 # MESSAGES
 
 def sendmsg(msg, text, **kwargs):
+    if str(msg.chat) in chat_langs:
+        text = locale(text, to_lang=chat_langs[str(msg.chat)])
+
     bot.send_message(msg.chat, text, parse_mode='html', **kwargs)
 
 
 def replymsg(msg, text):
+    if str(msg.chat) in chat_langs:
+        text = locale(text, to_lang=chat_langs[str(msg.chat)])
+
     sendmsg(msg, text, reply_to_message_id=msg.message_id)
 
 
 def editmsg(msg, text):
+    if str(msg.chat) in chat_langs:
+        text = locale(text, to_lang=chat_langs[str(msg.chat)])
+
     bot.edit_message_text(text, msg.chat, msg.message_id)
 
 
@@ -49,7 +70,6 @@ def delmsg(*msgs, chat=None, by_id=False):
 
 
 # USER RESTRICTIONS
-
 
 def mute(msg, duration='1m'):
     if not isinstance(duration, (list, tuple)):
@@ -141,4 +161,14 @@ def msglistener(msg):
 # INITIALIZATION
 
 def init():
-    Thread(target=bot.polling, kwargs={'none_stop': True}).start()
+    Thread(target=polling).start()
+
+
+def polling():
+    while True:
+        try:
+            bot.polling(none_stop=True)
+        except Exception as exc:
+            println('WRAPPER:telegram', f'An error occurred while polling: {exc}')
+            println('WRAPPER:telegram', 'Re-connecting in 5 seconds...')
+            sleep(5)
