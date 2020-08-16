@@ -2,7 +2,7 @@ import syst.tools.dbm as dbm
 import syst.mworker as mworker
 
 
-dbm.open_db('user-deletions.db')
+dbm.open_db('user-deletions')
 
 
 @mworker.handler(lambda msg: msg.content.lower().startswith('удали') and msg.author.admin and msg.replied)
