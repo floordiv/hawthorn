@@ -1,7 +1,8 @@
 import syst.mworker as worker
+import syst.tools.filters as filters
 
 
-@worker.handler(lambda msg: msg.content.lower().startswith('повтори'))
+@worker.handler(lambda msg: filters.startswith(msg, 'повтори', 'say', 'фикус, повтори'))
 def handler(wrapper, msg):
     text = msg.content[len('повтори'):]
 

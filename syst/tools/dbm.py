@@ -5,6 +5,9 @@ databases = {}  # name: (conn, cursor)
 
 
 def open_db(name, init_query=None):
+    if name in databases:
+        return
+
     conn = sqlite3.connect('data/' + name + '.db', check_same_thread=False)
     cursor = conn.cursor()
 

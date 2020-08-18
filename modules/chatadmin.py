@@ -1,4 +1,5 @@
 import syst.mworker as mworker
+import syst.tools.filters as filters
 import syst.tools.dateparser as dateparser
 
 
@@ -9,7 +10,7 @@ functions_map = lambda wrapper: {'!ban':    wrapper.ban,
                                  }
 
 
-@mworker.handler(lambda msg: mworker.startswith(msg.content, ('!ban', '!unban', '!mute', '!unmute')) and msg.replied and msg.author.admin
+@mworker.handler(lambda msg: filters.startswith(msg, '!ban', '!unban', '!mute', '!unmute') and msg.replied and msg.author.admin
                  and not msg.replied.author.admin)
 def handle_user_restrict(wrapper, msg):
     text = msg.content.split()

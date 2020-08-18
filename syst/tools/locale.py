@@ -33,6 +33,6 @@ def update_locale(lang):
 
 
 def get_langs():
-    files = getfiles.from_folder('locales')
+    files = getfiles.from_folder('locales', lambda file: file.endswith('.json'))
 
-    return [file[:-len('.json')] for file in files if file.endswith('.json')]
+    return [file[:-len('.json')] for file in files]

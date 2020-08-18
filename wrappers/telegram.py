@@ -28,6 +28,9 @@ me = bot.get_me()
 
 self = sys.modules[__name__]    # a link to the wrapper
 
+DEFAULT_CHAT_LANG = 'en'
+
+
 dbm.open_db('chat-langs', 'CREATE TABLE IF NOT EXISTS chats (platform string, chat string, lang string)')
 dbm.execute('chat-langs', 'SELECT * FROM chats WHERE platform = "telegram"')
 query_result = dbm.fetchall('chat-langs')  # ((chat_id, lang), (...))
@@ -41,23 +44,17 @@ else:
 # MESSAGES
 
 def sendmsg(msg, text, **kwargs):
-    if str(msg.chat) in chat_langs:
-        text = locale(text, to_lang=chat_langs[str(msg.chat)])
-
+    text = locale_text(msg.chat, text)
     bot.send_message(msg.chat, text, parse_mode='html', **kwargs)
 
 
 def replymsg(msg, text):
-    if str(msg.chat) in chat_langs:
-        text = locale(text, to_lang=chat_langs[str(msg.chat)])
-
+    text = locale_text(msg.chat, text)
     sendmsg(msg, text, reply_to_message_id=msg.message_id)
 
 
 def editmsg(msg, text):
-    if str(msg.chat) in chat_langs:
-        text = locale(text, to_lang=chat_langs[str(msg.chat)])
-
+    text = locale_text(msg.chat, text)
     bot.edit_message_text(text, msg.chat, msg.message_id)
 
 
@@ -148,6 +145,16 @@ def get_message_object(msg):
     return message_object
 
 
+def locale_text(chat, text):
+    if chat in chat_langs:
+        to_lang = chat_langs[chat]
+    else:
+        print(chat, chat_langs)
+        to_lang = DEFAULT_CHAT_LANG
+
+    return locale(text, to_lang=to_lang)
+
+
 # UPDATERS
 
 @bot.message_handler(func=lambda call: True)
@@ -156,6 +163,15 @@ def msglistener(msg):
     mworker.process_update(self, message)
 
     println('WRAPPER:telegram', f'[{msg.chat.title}] {get_username(msg)}: {msg.text}')
+
+
+def update_locales():
+    dbm.execute('chat-langs', 'SELECT * FROM chats WHERE platform = "telegram"')
+    query_res = dbm.fetchall('chat-langs')
+
+    if query_res:
+        new_chat_langs = dict([(chat, lang) for platform, chat, lang in query_res])
+        chat_langs.update(new_chat_langs)
 
 
 # INITIALIZATION

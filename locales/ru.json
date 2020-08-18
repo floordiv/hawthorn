@@ -1,15 +1,4 @@
 {
-  "has been banned until": "был забанен, вплоть до",
-  "has been muted until": "замолчал, вплоть до",
-
-  "Why don't you love yourself so much": "биполяр очка",
-
-  "Choose a module": "Выберите модуль",
-  "Choose a trigger": "Выберите триггер",
-
-  "Language has been successfully installed": "Язык успешно установлен",
-  "Enter one of the given languages": "Выберите язык из предложенных",
-
-  "Hello! I am Ficus - flexible chat administrating bot": "Ну чё ебать, здарова отец",
-  "Bot has been already started!": "Ты уёбак? Ты уже запустил меня, шизик ебучий"
+  "Language successfully changed": "Язык успешно установлен",
+  "Language already installed": "Язык уже установлен"
 }
