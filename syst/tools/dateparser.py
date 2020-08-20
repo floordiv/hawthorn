@@ -31,14 +31,13 @@ def parse(*dates):
     total = 0
 
     for date in dates:
-        time_of_mute = date[:-1]  # remove letter
+        number = date[:-1]  # remove letter
         chosen_multiplier = date[-1]
 
-        if not time_of_mute.isdigit() or chosen_multiplier not in multipliers:
+        if not number.isdigit() or chosen_multiplier not in multipliers:
             continue
 
-        if chosen_multiplier in multipliers.keys():
-            total += int(time_of_mute) * multipliers[chosen_multiplier]
+        total += int(number) * multipliers[chosen_multiplier]
 
     return total
 

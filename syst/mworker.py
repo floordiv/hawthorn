@@ -12,7 +12,7 @@ def handler(name=None, _filter=None):
     assert name is not None
 
     if _filter is None:
-        _filter = name
+        name, _filter = name.__name__, name
 
     def decorator(func):
         handlers.append((name, func, _filter))
