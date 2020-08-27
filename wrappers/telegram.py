@@ -26,7 +26,7 @@ else:
 bot = telebot.TeleBot(token)
 me = bot.get_me()
 
-self = sys.modules[__name__]    # a link to the wrapper
+wrapper = sys.modules[__name__]    # a link to the wrapper
 
 DEFAULT_CHAT_LANG = 'en'
 
@@ -43,27 +43,51 @@ else:
 
 # MESSAGES
 
-def sendmsg(msg, text, **kwargs):
+def sendmsg(msg, text, keyboard=None, **kwargs):
     text = locale_text(msg.chat, text)
+
+    if keyboard:
+        telebot_keyboard = keyboard.convert()
+        kwargs['reply_markup'] = telebot_keyboard
+
+        keyboard.handle()
+
     bot.send_message(msg.chat, text, parse_mode='html', **kwargs)
 
 
-def replymsg(msg, text):
+def replymsg(msg, text, keyboard=None, **kwargs):
     text = locale_text(msg.chat, text)
-    sendmsg(msg, text, reply_to_message_id=msg.message_id)
+
+    if keyboard:
+        telebot_keyboard = keyboard.convert()
+        kwargs['reply_markup'] = telebot_keyboard
+
+        keyboard.handle()
+
+    sendmsg(msg, text, reply_to_message_id=msg.message_id, **kwargs)
 
 
-def editmsg(msg, text):
+def editmsg(msg, text, keyboard=None, **kwargs):
     text = locale_text(msg.chat, text)
-    bot.edit_message_text(text, msg.chat, msg.message_id)
+
+    if keyboard:
+        telebot_keyboard = keyboard.convert()
+        kwargs['reply_markup'] = telebot_keyboard
+
+        keyboard.handle()
+
+    bot.edit_message_text(text, msg.chat, msg.message_id, **kwargs)
 
 
 def delmsg(*msgs, chat=None, by_id=False):
     for msg in msgs:
-        if not by_id:
-            bot.delete_message(msg.chat, msg.message_id)
-        else:
-            bot.delete_message(chat, msg)    # msg is id of the message
+        try:
+            if not by_id:
+                bot.delete_message(msg.chat, msg.message_id)
+            else:
+                bot.delete_message(chat, msg)    # msg is id of the message
+        except telebot.apihelper.ApiException:
+            continue
 
 
 # USER RESTRICTIONS
@@ -100,6 +124,59 @@ def unban(msg, duration='366d'):
 
 # TODO: implement buttons support
 
+class Keyboard:
+    def __init__(self, *buttons):
+        self.buttons = list(buttons)
+        self.callback_handlers_map = {}  # callback_data: callback_handler
+
+    def add(self, *buttons):
+        self.buttons.extend(buttons)
+
+    def convert(self):
+        """
+        This is a method only for wrapper, it makes from this class a telebot's keyboard
+        """
+        keyboard = telebot.types.InlineKeyboardMarkup()
+
+        for button in self.buttons:
+            self.callback_handlers_map[button.callback_data] = button.callback
+
+            telebot_button = telebot.types.InlineKeyboardButton(text=button.text, callback_data=button.callback_data)
+            keyboard.add(telebot_button)
+
+        return keyboard
+
+    def handle(self):
+        callback_query_filter = lambda callback: callback.data in self.callback_handlers_map
+
+        telebot_callback_query_handler = bot.callback_query_handler(callback_query_filter)
+        telebot_callback_query_handler(self.on_press_handler)
+
+    def on_press_handler(self, callback):
+
+        # fill User's object
+        user_id = callback.from_user.id
+        author = types.User(callback.from_user.username, user_id, isadmin(user_id, callback.message.chat.id))
+
+        data = Callback(callback.data, callback.message.chat.id, author)
+
+        this_callback_handler = self.callback_handlers_map[callback.data]
+        this_callback_handler(wrapper, data)
+
+
+class Button:
+    def __init__(self, text, callback, callback_data=''):
+        self.text = text
+        self.callback = callback
+        self.callback_data = callback_data
+
+
+class Callback:
+    def __init__(self, data, chat, author):
+        self.data = data
+        self.chat = chat
+        self.author = author
+
 
 # HELPERS
 
@@ -115,12 +192,15 @@ def get_username(msg):
     return name
 
 
+def isadmin(user_id, chat):
+    return user_id in [admin.user.id for admin in bot.get_chat_administrators(chat)]\
+        or user_id == 502656052
+
+
 def get_message_object(msg):
     user_id = msg.from_user.id
-    isadmin = user_id in [admin.user.id for admin in bot.get_chat_administrators(msg.chat.id)]\
-              or user_id == 502656052
 
-    author = types.User(get_username(msg), user_id, isadmin)
+    author = types.User(get_username(msg), user_id, isadmin(user_id, msg.chat.id))
 
     if msg.reply_to_message:
         replied = get_message_object(msg.reply_to_message)
@@ -160,7 +240,7 @@ def locale_text(chat, text):
 @bot.message_handler(func=lambda call: True)
 def msglistener(msg):
     message = get_message_object(msg)
-    mworker.process_update(self, message)
+    mworker.process_update(wrapper, message)
 
     println('WRAPPER:telegram', f'[{msg.chat.title}] {get_username(msg)}: {msg.text}')
 
