@@ -1,8 +1,16 @@
 import syst.mworker as mworker
 
 
+def default_keyboard(wrapper):
+    keyboard = wrapper.Keyboard()
+    button = wrapper.Button('Hello?', simple_button, callback_data='ok')
+    keyboard.add(button)
+
+    return keyboard
+
+
 def simple_button(wrapper, data):
-    wrapper.sendmsg(data, 'hello!')
+    wrapper.editmsg(data, '@' + data.author.username + ' ok!!', keyboard=default_keyboard(wrapper))
 
 
 @mworker.handler(lambda msg: msg.content.startswith('!button'))

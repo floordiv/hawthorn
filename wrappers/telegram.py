@@ -57,14 +57,7 @@ def sendmsg(msg, text, keyboard=None, **kwargs):
 
 def replymsg(msg, text, keyboard=None, **kwargs):
     text = locale_text(msg.chat, text)
-
-    if keyboard:
-        telebot_keyboard = keyboard.convert()
-        kwargs['reply_markup'] = telebot_keyboard
-
-        keyboard.handle()
-
-    sendmsg(msg, text, reply_to_message_id=msg.message_id, **kwargs)
+    sendmsg(msg, text, reply_to_message_id=msg.message_id, keyboard=keyboard, **kwargs)
 
 
 def editmsg(msg, text, keyboard=None, **kwargs):
@@ -76,7 +69,10 @@ def editmsg(msg, text, keyboard=None, **kwargs):
 
         keyboard.handle()
 
-    bot.edit_message_text(text, msg.chat, msg.message_id, **kwargs)
+    try:
+        bot.edit_message_text(text, msg.chat, msg.message_id, **kwargs)
+    except telebot.apihelper.ApiException as exc:
+        println('WRAPPER:telegram', 'Failed to edit message: ' + str(exc))
 
 
 def delmsg(*msgs, chat=None, by_id=False):
@@ -122,7 +118,7 @@ def unban(msg, duration='366d'):
 
 # BUTTONS
 
-# TODO: implement buttons support
+# TODO: implement buttons support (done)
 
 class Keyboard:
     def __init__(self, *buttons):
@@ -158,24 +154,19 @@ class Keyboard:
         user_id = callback.from_user.id
         author = types.User(callback.from_user.username, user_id, isadmin(user_id, callback.message.chat.id))
 
-        data = Callback(callback.data, callback.message.chat.id, author)
+        data = types.Callback(callback.data, callback.message.chat.id, callback.message.message_id, author)
 
         this_callback_handler = self.callback_handlers_map[callback.data]
         this_callback_handler(wrapper, data)
 
+    def __str__(self):
+        buttons = f",\n{' ' * 17}".join([str(button) for button in self.buttons])
 
-class Button:
-    def __init__(self, text, callback, callback_data=''):
-        self.text = text
-        self.callback = callback
-        self.callback_data = callback_data
+        return f'Keyboard(buttons={buttons})'
 
 
-class Callback:
-    def __init__(self, data, chat, author):
-        self.data = data
-        self.chat = chat
-        self.author = author
+Button = types.Button
+Callback = types.Callback
 
 
 # HELPERS
@@ -229,7 +220,6 @@ def locale_text(chat, text):
     if chat in chat_langs:
         to_lang = chat_langs[chat]
     else:
-        print(chat, chat_langs)
         to_lang = DEFAULT_CHAT_LANG
 
     return locale(text, to_lang=to_lang)
