@@ -9,6 +9,9 @@ def handler(wrapper, msg):
     if text.lower().endswith('и удали'):
         text = text[:-len('и удали')]
 
+        if not text:
+            return wrapper.replymsg(msg, 'Слыш ты клоун блять на те в ебало блять уебок сука')
+
         wrapper.delmsg(msg)
 
         if msg.replied:
@@ -16,4 +19,7 @@ def handler(wrapper, msg):
         else:
             wrapper.sendmsg(msg, text)
     else:
+        if not text:
+            return wrapper.replymsg(msg, 'Слыш ты клоун блять на те в ебало блять уебок сука')
+        
         wrapper.replymsg(msg.replied or msg, text)
