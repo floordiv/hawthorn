@@ -11,7 +11,7 @@ def startswith(msg, *variables, check_case=False):
     return False
 
 
-def command(msg, *commands, prefix='!', check_case=False):
+def command(msg, *commands, prefix='!', check_case=False, split_space=True):
     text = msg.content
 
     if not check_case:
@@ -21,6 +21,9 @@ def command(msg, *commands, prefix='!', check_case=False):
         without_prefix = text[len(prefix):]
 
         for user_command in commands:
+            if split_space:
+                user_command += ' '
+
             if without_prefix.startswith(user_command):
                 return True
 
