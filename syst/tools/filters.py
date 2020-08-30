@@ -30,11 +30,14 @@ def command(msg, *commands, prefix='!', check_case=False, split_space=True):
     return False
 
 
-def getcommand(msg, *commands, prefix='!', check_case=False):
+def getcommand(msg, *commands, prefix='!', check_case=False, split_space=True):
     source_text = msg.content[len(prefix):]
     text = source_text if check_case else source_text.lower()
 
     for user_command in commands:
+        if split_space:
+            user_command += ' '
+            
         if text.startswith(user_command):
             return user_command, source_text[len(user_command):].lstrip()
 
