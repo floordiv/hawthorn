@@ -25,7 +25,6 @@ else:
 
 bot = telebot.TeleBot(token)
 me = bot.get_me()
-
 wrapper = sys.modules[__name__]    # a link to the wrapper
 
 DEFAULT_CHAT_LANG = 'en'

@@ -6,13 +6,13 @@ import syst.tools.filters as filters
 def handler(wrapper, msg):
     _, text = filters.getcommand(msg, 'повтори', 'say', 'фикус, повтори', prefix='')
 
-    if text.endswith('и удали'):
+    if text.lower().endswith('и удали'):
         text = text[:-len('и удали')]
 
         wrapper.delmsg(msg)
 
         if msg.replied:
-            wrapper.replymsg(msg, text)
+            wrapper.replymsg(msg.replied, text)
         else:
             wrapper.sendmsg(msg, text)
     else:

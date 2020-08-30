@@ -28,7 +28,7 @@ def command(msg, *commands, prefix='!', check_case=False):
 
 
 def getcommand(msg, *commands, prefix='!', check_case=False):
-    source_text = msg.text[len(prefix):]
+    source_text = msg.content[len(prefix):]
     text = source_text if check_case else source_text.lower()
 
     for user_command in commands:
