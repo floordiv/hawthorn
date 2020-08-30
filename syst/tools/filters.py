@@ -24,7 +24,7 @@ def command(msg, *commands, prefix='!', check_case=False, split_space=True):
             if split_space:
                 user_command += ' '
 
-            if without_prefix.startswith(user_command):
+            if without_prefix.startswith(user_command) or text == user_command:
                 return True
 
     return False
@@ -37,8 +37,8 @@ def getcommand(msg, *commands, prefix='!', check_case=False, split_space=True):
     for user_command in commands:
         if split_space:
             user_command += ' '
-            
-        if text.startswith(user_command):
+
+        if text.startswith(user_command) or text == user_command:
             return user_command, source_text[len(user_command):].lstrip()
 
     return None, None
