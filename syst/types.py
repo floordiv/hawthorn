@@ -32,8 +32,9 @@ class Button:
 
 
 class Callback:
-    def __init__(self, data, chat, message_id, author):
+    def __init__(self, data, chat, message_id, author, callback_id):
         self.data = data
         self.chat = chat
         self.message_id = message_id
         self.author = author
+        self.callback_id = callback_id

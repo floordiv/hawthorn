@@ -153,7 +153,7 @@ class Keyboard:
         user_id = callback.from_user.id
         author = types.User(callback.from_user.username, user_id, isadmin(user_id, callback.message.chat.id))
 
-        data = types.Callback(callback.data, callback.message.chat.id, callback.message.message_id, author)
+        data = types.Callback(callback.data, callback.message.chat.id, callback.message.message_id, author, callback.id)
 
         this_callback_handler = self.callback_handlers_map[callback.data]
         this_callback_handler(wrapper, data)
@@ -162,6 +162,10 @@ class Keyboard:
         buttons = f",\n{' ' * 17}".join([str(button) for button in self.buttons])
 
         return f'Keyboard(buttons={buttons})'
+
+
+def alert(callback, text):
+    bot.answer_callback_query(callback.callback_id, text, show_alert=True)
 
 
 Button = types.Button
