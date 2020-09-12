@@ -247,7 +247,7 @@ def msglistener(msg):
     message = get_message_object(msg)
     mworker.process_update(wrapper, message)
 
-    println('WRAPPER:telegram', f'[{msg.chat.title}] {get_username(msg)}: {msg.text}')
+    println('WRAPPER:telegram', f'[{msg.chat.title}] @{get_username(msg)}: {msg.text}')
 
 
 def update_locales():
