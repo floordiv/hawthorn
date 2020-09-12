@@ -11,34 +11,32 @@ def startswith(msg, *variables, check_case=False):
     return False
 
 
-def command(msg, *commands, prefix='!', check_case=False, split_space=True):
+def command(msg, *commands, prefix='!', check_case=False, only_command=False):
     text = msg.content
 
     if not check_case:
         text = text.lower()
 
+    if only_command:
+        return any([user_command == text for user_command in commands])
+
     if text.startswith(prefix):
         without_prefix = text[len(prefix):]
 
         for user_command in commands:
-            if split_space:
-                user_command += ' '
-
-            if without_prefix.startswith(user_command) or text == user_command.strip():
+            if without_prefix.startswith(user_command):
                 return True
 
     return False
 
 
-def getcommand(msg, *commands, prefix='!', check_case=False, split_space=True):
+def getcommand(msg, *commands, prefix='!', check_case=False):
     source_text = msg.content[len(prefix):]
     text = source_text if check_case else source_text.lower()
 
     for user_command in commands:
-        if split_space:
-            user_command += ' '
 
-        if text.startswith(user_command) or text == user_command.strip():
+        if text.startswith(user_command):
             return user_command, source_text[len(user_command):].lstrip()
 
     return None, None

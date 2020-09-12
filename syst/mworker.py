@@ -1,11 +1,10 @@
-import syst.tools.threadpool as tp
+from syst.tools.threadpool import ThreadPool
 
-
-THREADS_FOR_HANDLERS_PROCESSING = 10
 
 handlers = []   # [[name, handler, filter]]
-threadpool = tp.ThreadPool(THREADS_FOR_HANDLERS_PROCESSING, exit_when_no_events=False)
-threadpool.start()
+
+tp = ThreadPool(10, exit_when_no_events=False)
+tp.start()
 
 
 def handler(name=None, _filter=None):
@@ -29,4 +28,4 @@ def add_handler(name, handler_func, _filter):
 def process_update(wrapper, message):
     for name, func, _filter in handlers:
         if _filter(message):
-            threadpool.add_event(func, (wrapper, message))
+            tp.add_event(func, (wrapper, message))

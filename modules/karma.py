@@ -2,12 +2,13 @@ from math import sqrt
 
 import syst.tools.dbm as dbm
 import syst.mworker as mworker
+import syst.tools.filters as filters
 
 
 dbm.open_db('karma', 'CREATE TABLE IF NOT EXISTS chats (chat string, username string, karma float)')
 
 
-@mworker.handler(lambda msg: msg.content[0] in ('+', '-') and msg.replied)
+@mworker.handler(lambda msg: filters.command(msg, '+', '-', prefix='') and msg.replied)
 def karma_action(wrapper, msg):
     dbm.execute('karma', 'SELECT * FROM chats WHERE chat = ? AND username = ?',
                 params=(msg.chat, msg.author.userid))
@@ -17,7 +18,7 @@ def karma_action(wrapper, msg):
         dbm.execute('karma', f"INSERT INTO chats VALUES (?, ?, 1.0)", params=(msg.chat, msg.author.userid), autocommit=True)
         chat, initiator_user_id, initiator_karma = msg.chat, msg.author.userid, 1.0
     elif initiator[2] <= .0:
-        return wrapper.replymsg(msg, f'Your karma is not enough ({initiator[2]})')
+        return wrapper.replymsg(msg, f'Your karma is not enough ({round(initiator[2], 2)})')
     else:
         chat, initiator_user_id, initiator_karma = initiator
 
@@ -43,4 +44,15 @@ def karma_action(wrapper, msg):
     new_replied_user_karma = round(new_replied_user_karma, 2)
 
     wrapper.replymsg(msg, f'You {"increased" if add_karma > 0 else "decreased"} {msg.replied.author.username}\'s karma up to '
-                          f'{new_replied_user_karma} ({"+" if add_karma > 0 else ""}{add_karma})')
+                    f'{new_replied_user_karma} ({"+" if add_karma > 0 else ""}{add_karma})')
+
+
+@mworker.handler(lambda msg: filters.command(msg, 'me', only_command=True))
+def get_my_karma(wrapper, msg):
+    dbm.execute('karma', 'SELECT karma FROM chats WHERE chat = ? AND username = ?', params=(msg.chat, msg.author.userid))
+    his_karma = dbm.fetchone('karma')[0]
+
+    if not his_karma:
+        his_karma = 1.0
+
+    wrapper.replymsg(msg, f'Your karma is {his_karma}')

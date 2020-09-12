@@ -9,7 +9,7 @@ def from_folder(folder, file_filter=lambda file: file.endswith('.py') and '__' n
 
     if 'ignore' in folder_content:
         with open(folder + 'ignore') as ignore_list_file:
-            ignore_list += [file[:-1] for file in ignore_list_file.readlines()]
+            ignore_list += [file for file in ignore_list_file.readlines()]
 
     files_list = []
 

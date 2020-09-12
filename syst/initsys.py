@@ -1,6 +1,5 @@
-from importlib import import_module
-
 from traceback import format_exc
+from importlib import import_module
 
 import syst.tools.getfiles as gf    # I don't have it
 from syst.tools.output import println
@@ -28,7 +27,8 @@ for wrapper in wrappers:
     wrapper_name = wrapper[:-3]
 
     try:
-        import_module('wrappers.' + wrapper_name).init()
+        wrapper_object = import_module('wrappers.' + wrapper_name)
+        wrapper_object.init()
 
         println('INIT-WRAPPER:' + wrapper_name, 'Loaded')
     except Exception as exc:

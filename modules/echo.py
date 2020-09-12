@@ -4,7 +4,7 @@ import syst.tools.filters as filters
 
 @worker.handler(lambda msg: filters.command(msg, 'повтори', 'say', 'фикус, повтори', prefix=''))
 def handler(wrapper, msg):
-    _, text = filters.getcommand(msg, 'повтори', 'say', 'фикус, повтори', prefix='')
+    _, text = filters.getcommand(msg, 'повтори ', 'say ', 'фикус, повтори ', prefix='')
 
     if text.lower().endswith('и удали'):
         text = text[:-len('и удали')]

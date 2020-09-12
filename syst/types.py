@@ -1,5 +1,5 @@
 class Message:
-    def __init__(self, msgtype, content, chat, author, date, msgid, replied, new_members, platform):
+    def __init__(self, msgtype, content, chat, author, date, msgid, replied, new_members, platform, original):
         self.content_type = msgtype
         self.content = content
         self.chat = chat
@@ -9,6 +9,7 @@ class Message:
         self.message_id = msgid
         self.new_members = new_members
         self.platform = platform
+        self.original = original
 
 
 class User:

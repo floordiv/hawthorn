@@ -20,7 +20,6 @@ def send_msg(wrapper, msg):
         text = ' '.join(text)
 
     if not receiver.startswith('@'):
-        wrapper.delmsg(msg)
         return wrapper.sendmsg(msg, 'Private message syntax: !message [chat] @username text')
 
     if chat not in messages:

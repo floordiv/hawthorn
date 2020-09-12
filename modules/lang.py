@@ -9,7 +9,7 @@ DEFAULT_LANG = 'en'
 dbm.open_db('chat-langs')
 
 
-@mworker.handler(lambda msg: filters.startswith(msg, '/lang', '!langS'))
+@mworker.handler(lambda msg: filters.startswith(msg, '/lang', '!lang'))
 def setlang(wrapper, msg):
     available_langs = locale.get_langs()
 

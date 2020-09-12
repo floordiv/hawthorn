@@ -23,7 +23,8 @@ else:
         token = token.read().strip()
 
 
-bot = telebot.TeleBot(token)
+bot = telebot.TeleBot(token=token)
+
 me = bot.get_me()
 wrapper = sys.modules[__name__]    # a link to the wrapper
 
@@ -51,12 +52,13 @@ def sendmsg(msg, text, keyboard=None, **kwargs):
 
         keyboard.handle()
 
-    bot.send_message(msg.chat, text, parse_mode='html', **kwargs)
+    sleep(0)
+    bot.send_message(msg.chat, text, **kwargs)
 
 
-def replymsg(msg, text, keyboard=None, **kwargs):
+def replymsg(msg, text, **kwargs):
     text = locale_text(msg.chat, text)
-    sendmsg(msg, text, reply_to_message_id=msg.message_id, keyboard=keyboard, **kwargs)
+    sendmsg(msg, text, reply_to_message_id=msg.message_id, **kwargs)
 
 
 def editmsg(msg, text, keyboard=None, **kwargs):
@@ -68,14 +70,17 @@ def editmsg(msg, text, keyboard=None, **kwargs):
 
         keyboard.handle()
 
+    sleep(0)
+
     try:
         bot.edit_message_text(text, msg.chat, msg.message_id, **kwargs)
-    except telebot.apihelper.ApiException as exc:
+    except Exception as exc:
         println('WRAPPER:telegram', 'Failed to edit message: ' + str(exc))
 
 
 def delmsg(*msgs, chat=None, by_id=False):
     for msg in msgs:
+        sleep(0)
         try:
             if not by_id:
                 bot.delete_message(msg.chat, msg.message_id)
@@ -91,6 +96,7 @@ def mute(msg, duration='1m'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
+    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, False, False, False, False)
 
@@ -99,6 +105,7 @@ def unmute(msg, duration='366d'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
+    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, True, True, True, True)
 
@@ -107,11 +114,13 @@ def ban(msg, duration='1m'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
+    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.kick_chat_member(msg.chat, msg.author.userid, until_date)
 
 
 def unban(msg, duration='366d'):
+    sleep(0)
     bot.unban_chat_member(msg.chat, msg.author.userid)
 
 
@@ -165,6 +174,7 @@ class Keyboard:
 
 
 def alert(callback, text):
+    sleep(0)
     bot.answer_callback_query(callback.callback_id, text, show_alert=True)
 
 
@@ -214,7 +224,8 @@ def get_message_object(msg):
                                    msg.message_id,
                                    replied,
                                    new_chat_members,
-                                   'telegram')
+                                   'telegram',
+                                   msg)
 
     return message_object
 
@@ -225,11 +236,12 @@ def locale_text(chat, text):
     else:
         to_lang = DEFAULT_CHAT_LANG
 
-    return locale(text, to_lang=to_lang)
+    return locale(str(text), to_lang=to_lang)
 
 
 # UPDATERS
 
+@bot.edited_message_handler(func=lambda call: True)
 @bot.message_handler(func=lambda call: True)
 def msglistener(msg):
     message = get_message_object(msg)
@@ -260,4 +272,4 @@ def polling():
         except Exception as exc:
             println('WRAPPER:telegram', f'An error occurred while polling: {exc}')
             println('WRAPPER:telegram', 'Re-connecting in 5 seconds...')
-            sleep(5)
+            time.sleep(5)
