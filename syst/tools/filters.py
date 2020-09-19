@@ -11,7 +11,10 @@ def startswith(msg, *variables, check_case=False):
     return False
 
 
-def command(msg, *commands, prefix='!', check_case=False, only_command=False):
+def command(msg, *commands, prefix='!', check_case=False, only_command=False, accept_edited=False):
+    if not accept_edited and msg.isedited:
+        return False
+
     text = msg.content
 
     if not check_case:

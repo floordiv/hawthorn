@@ -219,6 +219,8 @@ def get_message_object(msg):
     message_object = types.Message(msg.content_type,
                                    msg.text,
                                    msg.chat.id,
+                                   msg.edit_date,
+                                   msg.edit_date,
                                    author,
                                    msg.date,
                                    msg.message_id,
