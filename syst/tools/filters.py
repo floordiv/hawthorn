@@ -21,7 +21,7 @@ def command(msg, *commands, prefix='!', check_case=False, only_command=False, ac
         text = text.lower()
 
     if only_command:
-        return any([user_command == text for user_command in commands])
+        return any([prefix + user_command == text for user_command in commands])
 
     if text.startswith(prefix):
         without_prefix = text[len(prefix):]

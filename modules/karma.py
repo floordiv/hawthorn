@@ -8,7 +8,7 @@ import syst.tools.filters as filters
 dbm.open_db('karma', 'CREATE TABLE IF NOT EXISTS chats (chat string, username string, karma float)')
 
 
-@mworker.handler(lambda msg: filters.command(msg, '+', '-', prefix='') and msg.replied)
+@mworker.handler(lambda msg: filters.command(msg, '+', '-', prefix='', only_command=True) and msg.replied)
 def karma_action(wrapper, msg):
     dbm.execute('karma', 'SELECT * FROM chats WHERE chat = ? AND username = ?',
                 params=(msg.chat, msg.author.userid))
@@ -44,7 +44,7 @@ def karma_action(wrapper, msg):
     new_replied_user_karma = round(new_replied_user_karma, 2)
 
     wrapper.replymsg(msg, f'You {"increased" if add_karma > 0 else "decreased"} {msg.replied.author.username}\'s karma up to '
-                    f'{new_replied_user_karma} ({"+" if add_karma > 0 else ""}{add_karma})')
+                          f'{new_replied_user_karma} ({"+" if add_karma > 0 else ""}{add_karma})')
 
 
 @mworker.handler(lambda msg: filters.command(msg, 'me', only_command=True))
