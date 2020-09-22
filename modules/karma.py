@@ -7,9 +7,14 @@ import syst.tools.filters as filters
 
 dbm.open_db('karma', 'CREATE TABLE IF NOT EXISTS chats (chat string, username string, karma float)')
 
+last_calls = {}  # chat: {user: last_called}
+
 
 @mworker.handler(lambda msg: filters.command(msg, '+', '-', prefix='', only_command=True) and msg.replied)
 def karma_action(wrapper, msg):
+    if msg.replied.author.userid == msg.author.userid:
+        return wrapper.replymsg(msg, 'No.')
+
     dbm.execute('karma', 'SELECT * FROM chats WHERE chat = ? AND username = ?',
                 params=(msg.chat, msg.author.userid))
     initiator = dbm.fetchone('karma')
