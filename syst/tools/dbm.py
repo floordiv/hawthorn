@@ -6,19 +6,6 @@ lock = Lock()
 databases = {}  # name: (conn, cursor)
 
 
-def threadsafe_db_call(func):
-    def wrapper(*args, **kwargs):
-        try:
-            lock.acquire(True)
-
-            func(*args, **kwargs)
-        finally:
-            lock.release()
-
-    return wrapper
-
-
-@threadsafe_db_call
 def open_db(name, init_query=None):
     if name in databases:
         return
@@ -33,7 +20,6 @@ def open_db(name, init_query=None):
         conn.commit()
 
 
-@threadsafe_db_call
 def execute(name, sql, params=(), autocommit=False):
     assert name in databases
 
@@ -49,7 +35,6 @@ def execute(name, sql, params=(), autocommit=False):
         lock.release()
 
 
-@threadsafe_db_call
 def commit(name):
     assert name in databases
 
@@ -57,7 +42,6 @@ def commit(name):
     conn.commit()
 
 
-@threadsafe_db_call
 def fetchone(name):
     assert name in databases
 
@@ -66,7 +50,6 @@ def fetchone(name):
     return cursor.fetchone()
 
 
-@threadsafe_db_call
 def fetchall(name):
     assert name in databases
 
@@ -75,7 +58,6 @@ def fetchall(name):
     return cursor.fetchall()
 
 
-@threadsafe_db_call
 def fetchmany(name, size):
     assert name in databases
 

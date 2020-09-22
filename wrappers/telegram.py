@@ -2,11 +2,11 @@ import os
 import sys
 import time
 import telebot
+import sqlite3
 from time import sleep
 from threading import Thread
 
 import syst.types as types
-import syst.tools.dbm as dbm
 import syst.mworker as mworker
 from syst.tools.locale import locale
 from syst.tools.output import println
@@ -31,9 +31,12 @@ wrapper = sys.modules[__name__]    # a link to the wrapper
 DEFAULT_CHAT_LANG = 'en'
 
 
-dbm.open_db('chat-langs', 'CREATE TABLE IF NOT EXISTS chats (platform string, chat string, lang string)')
-dbm.execute('chat-langs', 'SELECT * FROM chats WHERE platform = "telegram"')
-query_result = dbm.fetchall('chat-langs')  # ((chat_id, lang), (...))
+conn = sqlite3.connect('data/chat-langs.sqlite')
+cursor = conn.cursor()
+cursor.execute('CREATE TABLE IF NOT EXISTS chats (platform string, chat string, lang string)')
+conn.commit()
+cursor.execute('SELECT * FROM chats WHERE platform = "telegram"')
+query_result = cursor.fetchall()
 
 if query_result:
     chat_langs = dict([(chat, lang) for platform, chat, lang in query_result])
@@ -253,8 +256,8 @@ def msglistener(msg):
 
 
 def update_locales():
-    dbm.execute('chat-langs', 'SELECT * FROM chats WHERE platform = "telegram"')
-    query_res = dbm.fetchall('chat-langs')
+    cursor.execute('SELECT * FROM chats WHERE platform = "telegram"')
+    query_res = cursor.fetchall()
 
     if query_res:
         new_chat_langs = dict([(chat, lang) for platform, chat, lang in query_res])
