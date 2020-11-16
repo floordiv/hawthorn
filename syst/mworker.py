@@ -1,4 +1,7 @@
+from syst.tools.output import println
 from syst.tools.threadpool import ThreadPool
+
+from traceback import format_exc
 
 
 handlers = []   # [[name, handler, filter]]
@@ -27,5 +30,12 @@ def add_handler(name, handler_func, _filter):
 
 def process_update(wrapper, message):
     for name, func, _filter in handlers:
-        if _filter(message):
+        try:
+            filter_returns_true = _filter(message)
+        except Exception as exc:
+            println('UPDATE-MANAGER', f'Filter of the handler "{name}" raised an error: {exc}')
+            print(format_exc())
+            continue
+
+        if filter_returns_true:
             tp.add_event(func, (wrapper, message))

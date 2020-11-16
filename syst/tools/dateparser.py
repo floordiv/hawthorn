@@ -56,4 +56,4 @@ def date_by_seconds(seconds):
 
         result += str(value) + ' ' + name + ', '
 
-    return result.strip(',')
+    return result.rstrip(', ')
