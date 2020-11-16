@@ -16,7 +16,7 @@ for module in modules:
 
         println('INIT-MODULE:' + module_name, 'Loaded')
     except Exception as exc:
-        print(format_exc())
+        # print(format_exc())
         println('INIT-MODULE:' + module_name, 'Failed: ' + str(exc))
 
 
