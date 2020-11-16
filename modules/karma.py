@@ -5,7 +5,7 @@ import syst.mworker as mworker
 import syst.tools.filters as filters
 
 
-conn = sqlite3.connect('data/karma.sqlite', check_same_thread=False)
+conn = sqlite3.connect('./data/karma.sqlite', check_same_thread=False)
 cursor = conn.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS chats (chat string, username string, karma float)')
 conn.commit()

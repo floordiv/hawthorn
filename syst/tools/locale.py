@@ -21,14 +21,14 @@ def get_locale(lang):
     if lang in cache:
         return cache[lang]
 
-    with open('locales/' + lang + '.json') as locale_file:
+    with open('./locales/' + lang + '.json') as locale_file:
         cache[lang] = json.load(locale_file)
 
         return cache[lang]
 
 
 def update_locale(lang):
-    with open('locales/' + lang + '.json') as locale_file:
+    with open('./locales/' + lang + '.json') as locale_file:
         cache[lang] = json.load(locale_file)
 
 
