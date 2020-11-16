@@ -1,7 +1,7 @@
 import sqlite3
 
 
-conn = sqlite3.connect('test_database.db')
+conn = sqlite3.connect('./test_database.db')
 cursor = conn.cursor()
 
 # CREATE TABLE chats (chat_id string, user_id string)
