@@ -13,15 +13,17 @@ from syst.tools.output import println
 import syst.tools.dateparser as dateparser
 
 
-if 'tg-token' not in os.listdir('data'):
-    token = input('Your telegram token> ')
+token = os.getenv('TG_TOKEN')
 
-    with open('data/tg-token', 'w') as token_file:
-        token_file.write(token)
-else:
-    with open('data/tg-token') as token:
-        token = token.read().strip()
+if token is None:
+    if 'tg-token' not in os.listdir('./data'):
+        token = input('Your telegram token> ')
 
+        with open('./data/tg-token', 'w') as token_file:
+            token_file.write(token)
+    else:
+        with open('./data/tg-token') as token:
+            token = token.read().strip()
 
 bot = telebot.TeleBot(token=token)
 
@@ -31,21 +33,20 @@ wrapper = sys.modules[__name__]    # a link to the wrapper
 DEFAULT_CHAT_LANG = 'en'
 
 
-conn = sqlite3.connect('data/chat-langs.sqlite')
+conn = sqlite3.connect('./data/chat-langs.sqlite')
 cursor = conn.cursor()
 cursor.execute('CREATE TABLE IF NOT EXISTS chats (platform string, chat string, lang string)')
 conn.commit()
-cursor.execute('SELECT * FROM chats WHERE platform = "telegram"')
+cursor.execute('SELECT chat, lang FROM chats WHERE platform = "telegram"')
 query_result = cursor.fetchall()
 
 if query_result:
-    chat_langs = dict([(chat, lang) for platform, chat, lang in query_result])
+    chat_langs = dict([(chat, lang) for chat, lang in query_result])
 else:
     chat_langs = {}
 
 
 # MESSAGES
-
 def sendmsg(msg, text, keyboard=None, **kwargs):
     text = locale_text(msg.chat, text)
 
@@ -54,8 +55,6 @@ def sendmsg(msg, text, keyboard=None, **kwargs):
         kwargs['reply_markup'] = telebot_keyboard
 
         keyboard.handle()
-
-    sleep(0)
     bot.send_message(msg.chat, text, **kwargs)
 
 
@@ -73,8 +72,6 @@ def editmsg(msg, text, keyboard=None, **kwargs):
 
         keyboard.handle()
 
-    sleep(0)
-
     try:
         bot.edit_message_text(text, msg.chat, msg.message_id, **kwargs)
     except Exception as exc:
@@ -83,7 +80,6 @@ def editmsg(msg, text, keyboard=None, **kwargs):
 
 def delmsg(*msgs, chat=None, by_id=False):
     for msg in msgs:
-        sleep(0)
         try:
             if not by_id:
                 bot.delete_message(msg.chat, msg.message_id)
@@ -94,12 +90,10 @@ def delmsg(*msgs, chat=None, by_id=False):
 
 
 # USER RESTRICTIONS
-
 def mute(msg, duration='1m'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
-    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, False, False, False, False)
 
@@ -108,7 +102,6 @@ def unmute(msg, duration='366d'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
-    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.restrict_chat_member(msg.chat, msg.author.userid, until_date, True, True, True, True)
 
@@ -117,20 +110,15 @@ def ban(msg, duration='1m'):
     if not isinstance(duration, (list, tuple)):
         duration = [*duration]
 
-    sleep(0)
     until_date = time.time() + dateparser.parse(*duration)
     bot.kick_chat_member(msg.chat, msg.author.userid, until_date)
 
 
 def unban(msg, duration='366d'):
-    sleep(0)
     bot.unban_chat_member(msg.chat, msg.author.userid)
 
 
 # BUTTONS
-
-# TODO: implement buttons support (done)
-
 class Keyboard:
     def __init__(self, *buttons):
         self.buttons = list(buttons)
@@ -160,7 +148,6 @@ class Keyboard:
         telebot_callback_query_handler(self.on_press_handler)
 
     def on_press_handler(self, callback):
-
         # fill User's object
         user_id = callback.from_user.id
         author = types.User(callback.from_user.username, user_id, isadmin(user_id, callback.message.chat.id))
@@ -177,7 +164,6 @@ class Keyboard:
 
 
 def alert(callback, text):
-    sleep(0)
     bot.answer_callback_query(callback.callback_id, text, show_alert=True)
 
 
@@ -186,7 +172,6 @@ Callback = types.Callback
 
 
 # HELPERS
-
 def get_username(msg):
     if msg.from_user.username:
         return msg.from_user.username
@@ -245,7 +230,6 @@ def locale_text(chat, text):
 
 
 # UPDATERS
-
 @bot.edited_message_handler(func=lambda call: True)
 @bot.message_handler(func=lambda call: True)
 def msglistener(msg):
@@ -256,16 +240,15 @@ def msglistener(msg):
 
 
 def update_locales():
-    cursor.execute('SELECT * FROM chats WHERE platform = "telegram"')
+    cursor.execute('SELECT chat, lang FROM chats WHERE platform = "telegram"')
     query_res = cursor.fetchall()
 
     if query_res:
-        new_chat_langs = dict([(chat, lang) for platform, chat, lang in query_res])
+        new_chat_langs = dict([(chat, lang) for chat, lang in query_res])
         chat_langs.update(new_chat_langs)
 
 
 # INITIALIZATION
-
 def init():
     Thread(target=polling).start()
 

@@ -3,7 +3,8 @@ import syst.tools.filters as filters
 import syst.tools.dateparser as dateparser
 
 
-functions_map = lambda wrapper: {'ban':     wrapper.ban,
+functions_map = lambda wrapper: {
+                                 'ban':     wrapper.ban,
                                  'unban':   wrapper.unban,
                                  'mute':    wrapper.mute,
                                  'unmute':  wrapper.unmute
