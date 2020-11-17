@@ -11,8 +11,8 @@ This platform let's you to write bots for any available social network without a
 
 To run this framework, you need:
  - python 3.6+
- - have pytelegrambotapi installed 
- - create folder (if not exists) ./data and put there file "tgtoken" with your token for telegram
+ - have all the requirements installed
+ - create folder (if not exists) ./data and put there file "tg-token" with your token for telegram
  
  
 After that, just run `start.py`
